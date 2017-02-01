@@ -14,11 +14,19 @@ AS = $(GCCN64PREFIX)as
 LD = $(GCCN64PREFIX)ld
 OBJCOPY = $(GCCN64PREFIX)objcopy
 
+all: $(PROG_NAME).v64 $(PROG_NAME).z64
+
 $(PROG_NAME).v64: $(PROG_NAME).elf spritemap.dfs
 	$(OBJCOPY) $(PROG_NAME).elf $(PROG_NAME).bin -O binary
 	rm -f $(PROG_NAME).v64
 	$(N64TOOL) -b -l 2M -t "Spritemap Test" -h $(HEADERPATH)/$(HEADERNAME) -o $(PROG_NAME).v64 $(PROG_NAME).bin -s 1M spritemap.dfs
 	$(CHKSUM64PATH) $(PROG_NAME).v64
+
+$(PROG_NAME).z64: $(PROG_NAME).elf spritemap.dfs
+	$(OBJCOPY) $(PROG_NAME).elf $(PROG_NAME).bin -O binary
+	rm -f $(PROG_NAME).z64
+	$(N64TOOL) -l 2M -t "Spritemap Test" -h $(HEADERPATH)/$(HEADERNAME) -o $(PROG_NAME).z64 $(PROG_NAME).bin -s 1M spritemap.dfs
+	$(CHKSUM64PATH) $(PROG_NAME).z64
 
 $(PROG_NAME).elf : $(PROG_NAME).o
 	$(LD) -o $(PROG_NAME).elf $(PROG_NAME).o $(LINK_FLAGS)
@@ -29,7 +37,5 @@ copy: $(PROG_NAME).v64
 spritemap.dfs:
 	$(MKDFSPATH) spritemap.dfs ./filesystem/
 
-all: $(PROG_NAME).v64
-
 clean:
-	rm -f *.v64 *.elf *.o *.bin *.dfs
+	rm -f *.v64 *.z64 *.elf *.o *.bin *.dfs
